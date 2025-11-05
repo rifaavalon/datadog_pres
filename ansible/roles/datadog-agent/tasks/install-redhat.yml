@@ -12,11 +12,10 @@
       - "https://keys.datadoghq.com/DATADOG_RPM_KEY_FD4BF915.public"
 
 - name: Install Datadog Agent
-  ansible.builtin.package:
-    name: datadog-agent
-    state: present
-    update_cache: yes
-    use: yum
+  ansible.builtin.command:
+    cmd: yum install -y datadog-agent
+  args:
+    creates: /opt/datadog-agent
 
 - name: Set Datadog service name
   set_fact:
