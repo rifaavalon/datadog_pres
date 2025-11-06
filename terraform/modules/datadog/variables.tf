@@ -1,0 +1,16 @@
+variable "environment" {
+  description = "Environment name (dev, test, prod)"
+  type        = string
+}
+
+variable "datadog_api_key" {
+  description = "Datadog API key"
+  type        = string
+  sensitive   = true
+}
+
+variable "datadog_app_key" {
+  description = "Datadog Application key"
+  type        = string
+  sensitive   = true
+}

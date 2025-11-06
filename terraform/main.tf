@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    datadog = {
+      source  = "DataDog/datadog"
+      version = "~> 3.0"
+    }
   }
 
   # Backend configuration - can be overridden via -backend-config flags
@@ -28,6 +32,12 @@ provider "aws" {
       Owner       = var.owner
     }
   }
+}
+
+provider "datadog" {
+  api_key = var.datadog_api_key
+  app_key = var.datadog_app_key
+  api_url = "https://api.us5.datadoghq.com/"  # US5 site
 }
 
 # VPC Module
@@ -60,4 +70,13 @@ module "alb" {
   vpc_id           = module.vpc.vpc_id
   public_subnet_ids = module.vpc.public_subnet_ids
   instance_ids      = module.compute.instance_ids
+}
+
+# Datadog Monitors and Dashboards
+module "datadog" {
+  source = "./modules/datadog"
+
+  environment      = var.environment
+  datadog_api_key  = var.datadog_api_key
+  datadog_app_key  = var.datadog_app_key
 }
