@@ -6,10 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    # datadog = {
-    #   source  = "DataDog/datadog"
-    #   version = "~> 3.0"
-    # }
+    datadog = {
+      source  = "DataDog/datadog"
+      version = "~> 3.0"
+    }
   }
 
   # Backend configuration - can be overridden via -backend-config flags
@@ -34,12 +34,12 @@ provider "aws" {
   }
 }
 
-# provider "datadog" {
-#   api_key  = var.datadog_api_key
-#   app_key  = var.datadog_app_key
-#   api_url  = "https://api.us5.datadoghq.com/"  # US5 site
-#   validate = false  # Allow provider to be configured without validating credentials during plan
-# }
+provider "datadog" {
+  api_key  = var.datadog_api_key
+  app_key  = var.datadog_app_key
+  api_url  = "https://api.us5.datadoghq.com/"  # US5 site
+  validate = false  # Allow provider to be configured without validating credentials during plan
+}
 
 module "vpc" {
   source = "./modules/vpc"
