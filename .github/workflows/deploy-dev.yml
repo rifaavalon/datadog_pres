@@ -90,7 +90,7 @@ jobs:
       - name: Install Ansible
         run: |
           python -m pip install --upgrade pip
-          pip install ansible boto3 botocore
+          pip install ansible boto3 botocore pywinrm
 
       - name: Configure SSH
         run: |
@@ -140,17 +140,25 @@ jobs:
       - name: Wait for instances to be ready
         run: sleep 90
 
-      - name: Test Ansible connectivity
+      - name: Test Ansible connectivity (Linux)
         working-directory: ./ansible
         run: |
-          ansible all -i inventory/${{ env.ENVIRONMENT }}.ini -m ping
+          ansible ${{ env.ENVIRONMENT }}_servers -i inventory/${{ env.ENVIRONMENT }}.ini -m ping
         continue-on-error: true
 
-      - name: Deploy Datadog Agent
+      - name: Test Ansible connectivity (Windows)
+        if: false  # Windows WinRM requires additional setup - skip for now
+        working-directory: ./ansible
+        run: |
+          ansible windows_servers -i inventory/${{ env.ENVIRONMENT }}.ini -m win_ping
+        continue-on-error: true
+
+      - name: Deploy Datadog Agent (Linux)
         working-directory: ./ansible
         run: |
           ansible-playbook \
             -i inventory/${{ env.ENVIRONMENT }}.ini \
+            --limit ${{ env.ENVIRONMENT }}_servers \
             playbooks/deploy-datadog.yml \
             -e "datadog_api_key=${{ secrets.DD_API_KEY }}" \
             -e "datadog_site=us5.datadoghq.com" \
@@ -158,7 +166,7 @@ jobs:
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
 
-      - name: Verify Agent Deployment
+      - name: Verify Agent Deployment (Linux)
         working-directory: ./ansible
         run: |
           ansible ${{ env.ENVIRONMENT }}_servers \
@@ -168,11 +176,7 @@ jobs:
             --become
         continue-on-error: true
 
-      - name: Install pywinrm for Windows management
-        run: |
-          pip install pywinrm
-
-      - name: Deploy Datadog Agent on Windows
+      - name: Deploy Datadog Agent (Windows)
         working-directory: ./ansible
         run: |
           ansible-playbook \

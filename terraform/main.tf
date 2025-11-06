@@ -59,6 +59,8 @@ module "compute" {
   instance_count     = var.instance_count
   instance_type      = var.instance_type
   key_name          = var.key_name
+  datadog_api_key    = var.datadog_api_key
+  datadog_site       = var.datadog_site
 }
 
 module "alb" {

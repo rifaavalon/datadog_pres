@@ -170,20 +170,36 @@ resource "aws_instance" "windows" {
     # Create simple webpage
     Set-Content -Path "C:\inetpub\wwwroot\index.html" -Value "<h1>Hello from ${var.environment} - Windows Server</h1>"
 
-    # Enable WinRM for Ansible
-    winrm quickconfig -q
-    winrm set winrm/config/service '@{AllowUnencrypted="true"}'
-    winrm set winrm/config/service/auth '@{Basic="true"}'
+    # Download Datadog Agent MSI
+    $ddAgentUrl = "https://s3.amazonaws.com/ddagent-windows-stable/datadog-agent-7-latest.amd64.msi"
+    $ddAgentMsi = "C:\Windows\Temp\datadog-agent.msi"
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Invoke-WebRequest -Uri $ddAgentUrl -OutFile $ddAgentMsi
 
-    # Set Administrator password (retrieve from Secrets Manager in production)
-    # For demo, use a temporary password that will be changed via Ansible
+    # Install Datadog Agent
+    Start-Process msiexec.exe -Wait -ArgumentList "/qn /i $ddAgentMsi APIKEY=${var.datadog_api_key} SITE=${var.datadog_site} TAGS=`"env:${var.environment},os:windows,managed:terraform`""
 
-    # Configure firewall for WinRM
-    netsh advfirewall firewall add rule name="WinRM-HTTP" dir=in localport=5985 protocol=TCP action=allow
-    netsh advfirewall firewall add rule name="WinRM-HTTPS" dir=in localport=5986 protocol=TCP action=allow
+    # Wait for agent to install
+    Start-Sleep -Seconds 30
 
-    # Restart WinRM service
-    Restart-Service winrm
+    # Verify agent is running
+    Get-Service -Name datadogagent
+
+    # Configure IIS integration
+    $iisConfig = @"
+init_config:
+
+instances:
+  - host: localhost
+"@
+    New-Item -ItemType Directory -Force -Path "C:\ProgramData\Datadog\conf.d\iis.d"
+    Set-Content -Path "C:\ProgramData\Datadog\conf.d\iis.d\conf.yaml" -Value $iisConfig
+
+    # Restart Datadog Agent to pick up IIS config
+    Restart-Service datadogagent
+
+    # Clean up
+    Remove-Item $ddAgentMsi -Force
     </powershell>
     EOF
 

@@ -39,13 +39,15 @@ This will deploy:
 
 ### Required Secret for Tonight
 
-**DD_APP_KEY** - Add this tonight for Datadog monitors to work:
+**DD_APP_KEY** - For Datadog monitors:
 1. Go to: https://us5.datadoghq.com/organization-settings/application-keys
 2. Click "New Key" → Name: "Terraform - GitHub Actions"
 3. Copy the key value
 4. Add to GitHub: Settings → Secrets → Actions → New secret
    - Name: `DD_APP_KEY`
    - Value: [paste the application key]
+
+**Note:** Windows Datadog agent is installed automatically via user_data - no Ansible needed!
 
 ## Tomorrow Morning: Enable ECS + RDS Demo
 

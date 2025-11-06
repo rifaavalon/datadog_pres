@@ -32,3 +32,15 @@ variable "key_name" {
   description = "SSH key pair name"
   type        = string
 }
+
+variable "datadog_api_key" {
+  description = "Datadog API key for Windows agent installation"
+  type        = string
+  sensitive   = true
+}
+
+variable "datadog_site" {
+  description = "Datadog site (e.g., us5.datadoghq.com)"
+  type        = string
+  default     = "datadoghq.com"
+}
