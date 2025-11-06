@@ -79,7 +79,7 @@ module "alb" {
 
 
 # # ECS Service with Datadog sidecar
-# module "ecs" {
+module "ecs" {
   source = "./modules/ecs"
 
   environment             = var.environment
