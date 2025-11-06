@@ -40,17 +40,17 @@ output "ansible_inventory" {
   }
 }
 
-output "datadog_dashboard_url" {
-  description = "URL of the Datadog infrastructure dashboard"
-  value       = module.datadog.dashboard_url
-}
+# output "datadog_dashboard_url" {
+#   description = "URL of the Datadog infrastructure dashboard"
+#   value       = module.datadog.dashboard_url
+# }
 
-output "datadog_monitor_ids" {
-  description = "IDs of created Datadog monitors"
-  value       = module.datadog.monitor_ids
-}
+# output "datadog_monitor_ids" {
+#   description = "IDs of created Datadog monitors"
+#   value       = module.datadog.monitor_ids
+# }
 
-output "datadog_slo_id" {
-  description = "ID of the availability SLO"
-  value       = module.datadog.slo_id
-}
+# output "datadog_slo_id" {
+#   description = "ID of the availability SLO"
+#   value       = module.datadog.slo_id
+# }
