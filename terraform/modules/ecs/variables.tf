@@ -18,8 +18,8 @@ variable "alb_security_group_id" {
   type        = string
 }
 
-variable "target_group_arn" {
-  description = "Target group ARN for the load balancer"
+variable "alb_listener_arn" {
+  description = "ARN of the ALB listener for creating routing rules"
   type        = string
 }
 

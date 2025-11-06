@@ -98,6 +98,53 @@ resource "aws_security_group" "ecs_tasks" {
   }
 }
 
+# Target Group for ECS (IP target type for Fargate)
+resource "aws_lb_target_group" "ecs" {
+  name        = "${var.environment}-ecs-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"  # Required for Fargate with awsvpc network mode
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+    path                = "/"
+    matcher             = "200"
+  }
+
+  deregistration_delay = 30
+
+  tags = {
+    Environment = var.environment
+    Name        = "${var.environment}-ecs-tg"
+  }
+}
+
+# ALB Listener Rule for ECS (path-based routing)
+resource "aws_lb_listener_rule" "ecs" {
+  listener_arn = var.alb_listener_arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ecs.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/app/*", "/"]
+    }
+  }
+
+  tags = {
+    Environment = var.environment
+  }
+}
+
 # ECS Task Definition with Datadog sidecar
 resource "aws_ecs_task_definition" "app" {
   family                   = "${var.environment}-demo-app"
@@ -208,13 +255,14 @@ resource "aws_ecs_service" "app" {
   }
 
   load_balancer {
-    target_group_arn = var.target_group_arn
+    target_group_arn = aws_lb_target_group.ecs.arn
     container_name   = "demo-app"
     container_port   = 80
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.ecs_execution_role_policy
+    aws_iam_role_policy_attachment.ecs_execution_role_policy,
+    aws_lb_listener_rule.ecs
   ]
 
   tags = {
