@@ -18,6 +18,11 @@ output "instance_public_ips" {
   value       = module.compute.instance_public_ips
 }
 
+output "windows_instance_ip" {
+  description = "Public IP of the Windows instance"
+  value       = module.compute.windows_instance_public_ip
+}
+
 output "alb_dns_name" {
   description = "DNS name of the Application Load Balancer"
   value       = module.alb.alb_dns_name

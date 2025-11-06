@@ -8,6 +8,21 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+data "aws_ami" "windows" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["Windows_Server-2022-English-Full-Base-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 resource "aws_security_group" "instance" {
   name_prefix = "${var.environment}-instance-sg"
   vpc_id      = var.vpc_id
@@ -18,6 +33,14 @@ resource "aws_security_group" "instance" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # Allow SSH from anywhere (GitHub Actions)
     description = "SSH access for deployment automation"
+  }
+
+  ingress {
+    from_port   = 3389
+    to_port     = 3389
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "RDP access for Windows"
   }
 
   ingress {
@@ -111,6 +134,43 @@ resource "aws_instance" "app" {
   tags = {
     Name           = "${var.environment}-instance-${count.index + 1}"
     Environment    = var.environment
+    AnsibleManaged = "true"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Windows Server Instance
+resource "aws_instance" "windows" {
+  ami                    = data.aws_ami.windows.id
+  instance_type          = var.instance_type
+  key_name              = var.key_name
+
+  subnet_id              = element(var.public_subnet_ids, 0)
+  vpc_security_group_ids = [aws_security_group.instance.id]
+  iam_instance_profile   = aws_iam_instance_profile.instance.name
+
+  associate_public_ip_address = true
+
+  user_data = <<-EOF
+    <powershell>
+    # Install IIS
+    Install-WindowsFeature -name Web-Server -IncludeManagementTools
+
+    # Create simple webpage
+    Set-Content -Path "C:\inetpub\wwwroot\index.html" -Value "<h1>Hello from ${var.environment} - Windows Server</h1>"
+
+    # Download and install Datadog Agent (will be configured via Ansible)
+    # Placeholder for Datadog agent installation
+    </powershell>
+    EOF
+
+  tags = {
+    Name           = "${var.environment}-windows-instance"
+    Environment    = var.environment
+    OS             = "Windows"
     AnsibleManaged = "true"
   }
 
