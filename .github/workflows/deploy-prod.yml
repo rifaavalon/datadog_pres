@@ -58,7 +58,11 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ./terraform
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform apply -auto-approve \
+            -var-file=environments/${{ env.ENVIRONMENT }}/terraform.tfvars \
+            -var="datadog_api_key=${{ secrets.DD_API_KEY }}" \
+            -var="datadog_app_key=${{ secrets.DD_APP_KEY }}"
 
       - name: Get Terraform Outputs
         id: tf_outputs
