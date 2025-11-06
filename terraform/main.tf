@@ -70,10 +70,10 @@ module "alb" {
   instance_ids      = module.compute.instance_ids
 }
 
-# module "datadog" {
-#   source = "./modules/datadog"
+module "datadog" {
+  source = "./modules/datadog"
 
-#   environment      = var.environment
-#   datadog_api_key  = var.datadog_api_key
-#   datadog_app_key  = var.datadog_app_key
-# }
+  environment      = var.environment
+  datadog_api_key  = var.datadog_api_key
+  datadog_app_key  = var.datadog_app_key
+}

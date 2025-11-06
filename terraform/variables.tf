@@ -41,20 +41,20 @@ variable "owner" {
   default     = "Implementation Services"
 }
 
-# variable "datadog_api_key" {
-#   description = "Datadog API key (sensitive)"
-#   type        = string
-#   sensitive   = true
-# }
+variable "datadog_api_key" {
+  description = "Datadog API key (sensitive)"
+  type        = string
+  sensitive   = true
+}
 
-# variable "datadog_app_key" {
-#   description = "Datadog Application key (sensitive) - required for creating monitors/dashboards"
-#   type        = string
-#   sensitive   = true
-# }
+variable "datadog_app_key" {
+  description = "Datadog Application key (sensitive) - required for creating monitors/dashboards"
+  type        = string
+  sensitive   = true
+}
 
-# variable "datadog_site" {
-#   description = "Datadog site (datadoghq.com, datadoghq.eu, etc.)"
-#   type        = string
-#   default     = "us5.datadoghq.com"
-# }
+variable "datadog_site" {
+  description = "Datadog site (datadoghq.com, datadoghq.eu, etc.)"
+  type        = string
+  default     = "us5.datadoghq.com"
+}
