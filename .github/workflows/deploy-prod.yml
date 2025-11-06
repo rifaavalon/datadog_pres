@@ -53,6 +53,7 @@ jobs:
           terraform plan \
             -var-file=environments/${{ env.ENVIRONMENT }}/terraform.tfvars \
             -var="datadog_api_key=${{ secrets.DD_API_KEY }}" \
+            -var="datadog_app_key=${{ secrets.DD_APP_KEY }}" \
             -out=tfplan
 
       - name: Terraform Apply
